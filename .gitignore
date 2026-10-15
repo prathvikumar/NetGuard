@@ -1,0 +1,8 @@
+venv/
+__pycache__/
+*.py[cod]
+.env
+
+reports/netguard_report_*.csv
+
+reports/netguard_report_*.csv
