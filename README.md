@@ -111,8 +111,6 @@ These sample captures are generated for local testing and do not require sending
 
 # Output
 
-# Output
-
 NetGuard can generate the following outputs:
 
 - Timestamped CSV files containing traffic analysis results.
