@@ -6,3 +6,5 @@ __pycache__/
 reports/netguard_report_*.csv
 
 reports/netguard_report_*.csv
+
+reports/threat_alerts_backup.csv

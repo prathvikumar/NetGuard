@@ -20,6 +20,9 @@ def save_threat_report(alerts, output_dir="reports"):
         "distinct_ports",
         "ports",
         "severity",
+        "threshold",
+        "protocols",
+        "reason",
     ]
 
     file_exists = report_path.exists()
@@ -48,6 +51,11 @@ def save_threat_report(alerts, output_dir="reports"):
                     str(port) for port in alert.get("ports", [])
                 ),
                 "severity": alert.get("severity", "Unknown"),
+                "threshold": alert.get("threshold", ""),
+                "protocols": ", ".join(
+                    alert.get("protocols", [])
+                ),
+                "reason": alert.get("reason", ""),
             })
 
     print(f"Threat report saved: {report_path}")

@@ -26,31 +26,39 @@ def detect_threats(file_path, port_threshold=10):
 
     packets = rdpcap(str(capture_path))
 
-    # Map each source/destination pair to its destination ports.
+    # Store destination ports and observed transport protocols
+    # for each source/destination IP pair.
     contacted_ports = defaultdict(set)
+    observed_protocols = defaultdict(set)
 
     for packet in packets:
         if IP not in packet:
             continue
 
         if TCP in packet:
+            protocol = "TCP"
             destination_port = int(packet[TCP].dport)
         elif UDP in packet:
+            protocol = "UDP"
             destination_port = int(packet[UDP].dport)
         else:
             continue
 
         source_ip = packet[IP].src
         destination_ip = packet[IP].dst
+        connection = (source_ip, destination_ip)
 
-        contacted_ports[
-            (source_ip, destination_ip)
-        ].add(destination_port)
+        contacted_ports[connection].add(destination_port)
+        observed_protocols[connection].add(protocol)
 
     alerts = []
 
     for (source_ip, destination_ip), ports in contacted_ports.items():
         if len(ports) >= port_threshold:
+            protocols = sorted(
+                observed_protocols[(source_ip, destination_ip)]
+            )
+
             alert = {
                 "type": "Possible port scan",
                 "source_ip": source_ip,
@@ -58,11 +66,20 @@ def detect_threats(file_path, port_threshold=10):
                 "distinct_ports": len(ports),
                 "ports": sorted(ports),
                 "severity": "Medium",
+                "threshold": port_threshold,
+                "protocols": protocols,
+                "reason": (
+                    f"{len(ports)} distinct destination ports were "
+                    f"contacted, meeting the configured threshold "
+                    f"of {port_threshold}."
+                ),
             }
+
             alerts.append(alert)
 
     print("\n===== NETGUARD THREAT DETECTION =====")
     print(f"Packets examined: {len(packets)}")
+    print(f"Port-scan detection threshold: {port_threshold}")
 
     if alerts:
         print(f"Potential threat alerts: {len(alerts)}")
@@ -71,8 +88,14 @@ def detect_threats(file_path, port_threshold=10):
             print("\n[ALERT] Possible port scan")
             print(f"  Source IP: {alert['source_ip']}")
             print(f"  Destination IP: {alert['destination_ip']}")
-            print(f"  Distinct destination ports: {alert['distinct_ports']}")
+            print(
+                f"  Distinct destination ports: "
+                f"{alert['distinct_ports']}"
+            )
             print(f"  Ports: {alert['ports']}")
+            print(f"  Protocols: {', '.join(alert['protocols'])}")
+            print(f"  Threshold: {alert['threshold']}")
+            print(f"  Reason: {alert['reason']}")
             print(f"  Severity: {alert['severity']}")
     else:
         print("No port-scan patterns detected.")
