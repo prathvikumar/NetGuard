@@ -111,11 +111,19 @@ These sample captures are generated for local testing and do not require sending
 
 # Output
 
+# Output
+
 NetGuard can generate the following outputs:
 
 - Timestamped CSV files containing traffic analysis results.
-- protocol_traffic.png, a chart showing protocol packet counts.
-- threat_alerts.csv, containing potential threat alerts.
+- `protocol_traffic.png`, a chart showing protocol packet counts.
+- `threat_alerts.csv`, containing potential threat alerts.
+
+### Protocol Traffic Visualization
+
+The chart below shows protocol packet counts from the sample capture.
+
+![NetGuard Protocol Traffic Chart](reports/protocol_traffic.png)
 
 # How Threat Detection Works
 
