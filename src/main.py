@@ -13,13 +13,28 @@ def main():
     parser = argparse.ArgumentParser(
         description="NetGuard - Network Traffic Analysis Tool"
     )
+
     parser.add_argument(
         "capture",
         nargs="?",
         default="data/sample_traffic.pcap",
         help="Path to the PCAP capture file to analyze",
     )
+
+    parser.add_argument(
+        "--port-threshold",
+        type=int,
+        default=10,
+        help=(
+            "Minimum number of distinct destination ports "
+            "to flag a possible port scan (default: 10)"
+        ),
+    )
+
     args = parser.parse_args()
+
+    if args.port_threshold < 2:
+        parser.error("--port-threshold must be at least 2")
 
     print("=" * 50)
     print("                  NETGUARD")
@@ -33,6 +48,7 @@ def main():
         return 1
 
     print(f"\nAnalyzing capture: {capture_path}")
+    print(f"Port-scan detection threshold: {args.port_threshold}")
 
     try:
         # 1. Analyze network packets.
@@ -44,8 +60,11 @@ def main():
         # 3. Generate the protocol graph.
         create_protocol_chart(results)
 
-        # 4. Detect possible port scans.
-        alerts = detect_threats(str(capture_path))
+        # 4. Detect possible port scans using the selected threshold.
+        alerts = detect_threats(
+            str(capture_path),
+            port_threshold=args.port_threshold,
+        )
 
         # 5. Save threat alerts when detections exist.
         if alerts:
